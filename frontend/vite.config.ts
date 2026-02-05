@@ -5,4 +5,12 @@ import tailwindcss from '@tailwindcss/vite'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(),tailwindcss()],
+  server: {
+    port: 5173,
+    host: 'localhost',
+    strictPort: true,
+    hmr: {
+      port: 24678, // Different port for HMR to avoid conflicts
+    }
+  }
 })
