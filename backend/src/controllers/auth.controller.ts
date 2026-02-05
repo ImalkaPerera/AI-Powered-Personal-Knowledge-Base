@@ -23,6 +23,7 @@ export const register=async(req:Request,res:Response)=>{
         });
         res.status(201).json({message:"User registered successfully",userId:user.id});
     }catch(error){
+        console.error("Register error:", error);
         res.status(500).json({message:"Internal server error",error});
     }
 }
@@ -39,10 +40,48 @@ export const login=async(req:Request,res:Response)=>{
         const token=jwt.sign(
             {userId:user.id,role:user.role},
             process.env.JWT_SECRET||"secret",
-            {expiresIn:"1h"}
+            {expiresIn:"24h"}
         )
-        res.json({token,user:{email:user.email,role:user.role}});
+        res.json({
+            token,
+            user:{
+                id: user.id,
+                email:user.email,
+                role:user.role
+            }
+        });
     }catch(error){
+        console.error("Login error:", error);
         res.status(500).json({message:"Internal server error",error});
     }
 }
+
+// backend/src/controllers/auth.controller.ts
+
+export const getProfile = async (req: any, res: Response) => {
+  try {
+    // 1. Get the ID from the token (attached by middleware)
+    const userId = req.user.userId;
+
+    // 2. Fetch the user from the database
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { 
+        id: true, 
+        email: true, 
+        role: true, 
+        createdAt: true 
+      } // Never return the password
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // 3. Send the clean user data back
+    res.json(user);
+  } catch (error) {
+    console.error("Profile Error:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
