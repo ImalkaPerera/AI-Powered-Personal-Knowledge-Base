@@ -13,14 +13,31 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  localstack:
+    image: localstack/localstack:latest
+    container_name: localstack_main
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=s3
+      - DEBUG=1
+      - AWS_DEFAULT_REGION=us-east-1
+    volumes:
+      - "./init-s3.sh:/etc/localstack/init/ready.d/init-s3.sh" # Startup script
+      - "/var/run/docker.sock:/var/run/docker.sock"
+
   backend:
     build: ./backend
     ports:
       - "3000:3000"
     environment:
       - DATABASE_URL=postgresql://user:password@db:5432/knowledge_base
+      - AWS_ENDPOINT=http://localstack:4566
+      - AWS_REGION=us-east-1
+      - S3_BUCKET_NAME=knowledge-base-bucket
     depends_on:
       - db
+      - localstack
 
 volumes:
   postgres_data:
