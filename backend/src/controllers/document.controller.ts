@@ -3,15 +3,17 @@ import {PrismaClient} from "@prisma/client";
 import pg from "pg";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { PutObjectCommand } from "@aws-sdk/client-s3";
-import {s3Client,BUCKET_NAME} from "../config/s3.js";
+import {s3Client,BUCKET_NAME} from "../config/s3";
 import multer from "multer";
+
+const pdf = require("pdf-parse");
 
 const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
 const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
 const storage=multer.memoryStorage();
-export const uploadMiddlware=multer({storage:storage}).single("file");
+export const uploadMiddleware=multer({storage:storage}).single("file");
 
 export const uploadDocument=async(req:Request & { user?: { userId: string } },res:Response)=>{
     try{
@@ -22,6 +24,14 @@ export const uploadDocument=async(req:Request & { user?: { userId: string } },re
         const userId=(req as any).user.userId;
         const s3Key=`${userId}/${Date.now()}-${file.originalname}`;
 
+        // 1. Extract Text from PDF Buffer
+        let extractedText = "";
+        if (file.mimetype === "application/pdf") {
+            const data = await pdf(file.buffer);
+            extractedText = data.text;
+        }
+
+        // 2. Upload to LocalStack S3 (The file itself)
         await s3Client.send(new PutObjectCommand({
             Bucket:BUCKET_NAME,
             Key:s3Key,
@@ -29,6 +39,7 @@ export const uploadDocument=async(req:Request & { user?: { userId: string } },re
             ContentType:file.mimetype,
         }));
 
+        // 3. Save Metadata AND Content to Database
         const document=await prisma.document.create({
             data:{
                 name:file.originalname,
@@ -36,6 +47,7 @@ export const uploadDocument=async(req:Request & { user?: { userId: string } },re
                 size:file.size,
                 mimeType:file.mimetype,
                 userId:userId,
+                content:extractedText, // <--- Saving the text here
             },
         })
         res.status(201).json(document);

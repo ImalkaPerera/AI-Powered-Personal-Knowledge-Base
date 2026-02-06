@@ -1,7 +1,7 @@
 import "dotenv/config";
 import express from "express";
-import authRoutes from "./src/routes/auth.routes.js";
-import documentRoutes from "./src/routes/document.routes.js";
+import authRoutes from "./src/routes/auth.routes";
+import documentRoutes from "./src/routes/document.routes";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 const app=express();
