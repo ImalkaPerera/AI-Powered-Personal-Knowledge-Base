@@ -85,3 +85,55 @@ export const getProfile = async (req: any, res: Response) => {
     res.status(500).json({ message: "Internal server error" });
   }
 };
+
+// backend/src/controllers/auth.controller.ts
+
+export const refresh = async (req: Request, res: Response) => {
+    // 1. Get token from cookies (requires cookie-parser)
+    const refreshToken = req.cookies.refreshToken;
+
+    if (!refreshToken) {
+        return res.status(401).json({ message: "Refresh token missing" });
+    }
+
+    try {
+        // 2. Verify the token
+        const decoded = jwt.verify(
+            refreshToken, 
+            process.env.REFRESH_SECRET || "refresh_secret"
+        ) as { userId: string };
+
+        // 3. (Optional but Recommended) Check if user still exists in DB
+        const user = await prisma.user.findUnique({
+            where: { id: decoded.userId }
+        });
+
+        if (!user) {
+            return res.status(403).json({ message: "User no longer exists" });
+        }
+
+        // 4. Generate a new Access Token (15 minutes)
+        const accessToken = jwt.sign(
+            { userId: user.id, role: user.role },
+            process.env.JWT_SECRET || "access_secret",
+            { expiresIn: "15m" }
+        );
+
+        // 5. Send only the new access token to the frontend
+        res.json({ accessToken });
+    } catch (error) {
+        console.error("Refresh Error:", error);
+        // If token is expired or tampered with
+        res.status(403).json({ message: "Invalid or expired refresh token" });
+    }
+};
+
+
+export const logout = async (req: Request, res: Response) => {
+    res.clearCookie("refreshToken", {
+        httpOnly: true,
+        sameSite: "strict",
+        secure: process.env.NODE_ENV === "production",
+    });
+    res.json({ message: "Logged out successfully" });
+};
