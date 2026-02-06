@@ -15,11 +15,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   const checkAuth = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setLoading(false);
+      return;
+    }
+    
     try {
       const { data } = await api.get("/auth/me");
       setUser(data);
     } catch (error) {
       localStorage.removeItem("token");
+      setUser(null);
     } finally {
       setLoading(false);
     }
@@ -37,10 +44,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const logout = async () => {
     try {
       await api.post("/auth/logout");
+    } catch (error) {
+      // Ignore logout API errors, just clear local state
+      console.warn('Logout API failed:', error);
     } finally {
       localStorage.removeItem("token");
       setUser(null);
-      window.location.href = "/login";
+      // Don't use window.location.href as it causes page refresh
+      // Let the PrivateRoute handle navigation
     }
   };
 

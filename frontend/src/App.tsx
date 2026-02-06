@@ -19,6 +19,9 @@ export default function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
         <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+        <Route path="/dashboard/chat" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+        <Route path="/dashboard/knowledge" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+        <Route path="/dashboard/settings" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
         <Route path="/" element={<Navigate to="/dashboard" />} />
       </Routes>
     </BrowserRouter>
