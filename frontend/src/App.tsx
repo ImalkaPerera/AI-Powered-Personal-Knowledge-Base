@@ -4,6 +4,7 @@ import Register from "./pages/Register";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import KnowledgeBase from "./pages/KnowledgeBase";
+import Chat from "./pages/Chat";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 
 const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
@@ -20,7 +21,7 @@ export default function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/login" element={<Login />} />
         <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
-        <Route path="/dashboard/chat" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+        <Route path="/dashboard/chat" element={<PrivateRoute><Chat /></PrivateRoute>} />
         <Route path="/dashboard/knowledge" element={<PrivateRoute><KnowledgeBase /></PrivateRoute>} />
         <Route path="/dashboard/settings" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
         <Route path="/" element={<Navigate to="/dashboard" />} />

@@ -1,9 +1,11 @@
 generator client {
   provider = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
 }
 
 datasource db {
   provider = "postgresql"
+  extensions = [vector]
 }
 
 // backend/prisma/schema.prisma
@@ -24,8 +26,9 @@ model Document {
   name      String   // Original filename (e.g., "resume.pdf")
   s3Key     String   @unique // The ID in LocalStack S3
   size      Int      // File size in bytes
-  mimeType  String   // e.g., "application/pdf"
+  mimeType  String   // e.g., "application/pdf")
   content   String?  // Extracted text content for search/RAG
+  embedding String?  // Vector embeddings as JSON string for similarity search
   
   userId    String
   user      User     @relation(fields: [userId], references: [id])

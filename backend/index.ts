@@ -2,6 +2,7 @@ import "dotenv/config";
 import express from "express";
 import authRoutes from "./src/routes/auth.routes";
 import documentRoutes from "./src/routes/document.routes";
+import chatRoutes from "./src/routes/chat.routes";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 const app=express();
@@ -13,6 +14,7 @@ app.use(cors({
 app.use(express.json());
 app.use("/api/auth",authRoutes);
 app.use("/api/documents",documentRoutes);
+app.use("/api/chat",chatRoutes);
 app.listen(PORT,()=>{
     console.log(`Server is running on http://localhost:${PORT}`);
 });
