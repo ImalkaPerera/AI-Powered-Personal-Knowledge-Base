@@ -1,0 +1,15 @@
+{
+    "name": "full-stack-project-root",
+    "private": true,
+    "packageManager": "pnpm@10.2.1",
+    "scripts": {
+        "dev:frontend": "pnpm --filter frontend dev",
+        "dev:backend": "pnpm --filter backend dev",
+        "build:frontend": "pnpm --filter frontend build",
+        "install:all": "pnpm install"
+    },
+    "workspaces": [
+        "frontend",
+        "backend"
+    ]
+}
